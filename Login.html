@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f3f4f6;
+        }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-container h2 {
+            margin-bottom: 1rem;
+            text-align: center;
+            color: #333;
+        }
+        .login-container label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .login-container button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            text-align: center;
+            margin-top: 1rem;
+            color: #28a745;
+        }
+        .error {
+            text-align: center;
+            margin-top: 1rem;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="login-form">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username (letters only)" required>
+            
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password (numbers only)" required>
+            
+            <button type="submit">Login</button>
+        </form>
+        <div id="message" class="message" style="display: none;"></div>
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('login-form');
+        const messageDiv = document.getElementById('message');
+        const errorDiv = document.getElementById('error');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            // Validate username (alphabet only) and password (numeric only)
+            const usernameRegex = /^[A-Za-z]+$/;
+            const passwordRegex = /^[0-9]+$/;
+
+            if (!usernameRegex.test(username)) {
+                errorDiv.textContent = 'Username must contain only letters.';
+                errorDiv.style.display = 'block';
+                messageDiv.style.display = 'none';
+                return;
+            }
+
+            if (!passwordRegex.test(password)) {
+                errorDiv.textContent = 'Password must contain only numbers.';
+                errorDiv.style.display = 'block';
+                messageDiv.style.display = 'none';
+                return;
+            }
+
+            // Send validated data to the server
+            try {
+                const response = await fetch('http://localhost:3000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('token', data.token); // Save JWT token for later use
+                    messageDiv.textContent = 'Login successful!';
+                    messageDiv.style.display = 'block';
+                    errorDiv.style.display = 'none';
+
+                    // Redirect or perform other actions after login
+                    setTimeout(() => {
+                        window.location.href = '/property-list.html'; // Redirect to Property Listing Page
+                    }, 2000);
+                } else {
+                    errorDiv.textContent = 'Invalid username or password.';
+                    errorDiv.style.display = 'block';
+                    messageDiv.style.display = 'none';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again later.';
+                errorDiv.style.display = 'block';
+                messageDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
